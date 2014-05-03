@@ -22,14 +22,84 @@ game.state.add('level1', level1, false);
 
 game.state.start('boot');
 
-},{"./game":2,"./scenes/boot.js":3,"./scenes/level1":4,"./scenes/mainMenu":5,"./scenes/preloader":6}],2:[function(require,module,exports){
+},{"./game":4,"./scenes/boot.js":5,"./scenes/level1":6,"./scenes/mainMenu":7,"./scenes/preloader":8}],2:[function(require,module,exports){
+var Phaser = (window.Phaser),
+  game = require('../game');
+
+function Arrow() {
+
+  this.sprite = game.add.sprite(0, 0, 'arrow');
+  this.sprite.anchor.setTo(0.5, 0.5);
+
+  game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+
+  this.sprite.kill();
+}
+
+module.exports = Arrow;
+
+},{"../game":4}],3:[function(require,module,exports){
+var game = require('../game'),
+  Arrow = require('../classes/Arrow');
+
+function Bow() {
+
+  this.SHOT_DELAY = 1000;
+  this.ARROW_SPEED = 500;
+  this.NUMBER_OF_ARROWS = 1;
+  
+  var i, arrow;
+
+  this.sprite = game.add.sprite(50, game.height / 2, 'bow');
+  this.sprite.anchor.setTo(1, 0.5);
+
+  this.arrowPool = game.add.group();
+  for (i = 0; i < this.NUMBER_OF_ARROWS; i++) {
+    arrow = new Arrow();
+    this.arrowPool.add(arrow.sprite);
+  }
+
+  game.time.advancedTiming = true;
+}
+
+Bow.prototype.shoot = function () {
+
+  if (this.lastArrowShotAt === undefined) {
+    this.lastArrowShotAt = 0;
+  }
+
+  if (game.time.now - this.lastArrowShotAt < this.SHOT_DELAY) {
+    return;
+  }
+  this.lastArrowShotAt = game.time.now;
+
+  var arrow = this.arrowPool.getFirstDead();
+
+  if (arrow === null || arrow === undefined) {
+    return;
+  }
+
+  arrow.revive();
+
+  arrow.checkWorldBounds = true;
+  arrow.outOfBoundsKill = true;
+
+  arrow.reset(this.sprite.x, this.sprite.y);
+
+  arrow.body.velocity.x = this.ARROW_SPEED;
+  arrow.body.velocity.y = 0;
+};
+
+module.exports = Bow;
+
+},{"../classes/Arrow":2,"../game":4}],4:[function(require,module,exports){
 var Phaser = (window.Phaser);
 
 var game = new Phaser.Game(480, 320, Phaser.AUTO, 'content', null);
 
 module.exports = game;
 
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*globals module*/
 
 var game = require('../game');
@@ -60,92 +130,34 @@ module.exports = {
 
 };
 
-},{"../game":2}],4:[function(require,module,exports){
-/* globals module, require, localStorage*/
-
-var Phaser = (window.Phaser),
-  game = require('../game');
+},{"../game":4}],6:[function(require,module,exports){
+var /*Phaser = require('phaser'),*/
+  game = require('../game'),
+  Bow = require('../classes/Bow');
 
 
 module.exports = {
 
   create: function () {
 
-    game.physics.startSystem(Phaser.Physics.ARCADE);
+    game.stage.backgroundColor = 0xccddff;
 
-    this.background = this.add.sprite(0, 0, 'menu_background');
-
-    this.player = this.add.sprite(50, 50, 'game_sprites');
-
-    game.physics.enable(this.player, Phaser.Physics.ARCADE);
-    this.player.body.gravity.y = 1000;
-
-    this.blocks = game.add.group();
-    this.blocks.enableBody = true;
-    this.blocks.physicsBodyType = Phaser.Physics.ARCADE;
-
-    this.blocks.createMultiple(10, 'game_sprites', 1);
-
-
-    this.input.onDown.add(this.jump, this);
-
-    this.blockTimer = game.time.events.loop(500, this.addBlock, this);
-    this.scoreTimer = game.time.events.loop(Phaser.Timer.SECOND, this.addScore, this);
-
-    this.score = 0;
-    var style = {
-      font: '30px Arial',
-      fill: '#fff'
-    };
-    this.labelScore = game.add.text(20, 20, "0", style);
+    this.bow = new Bow();
   },
 
   update: function () {
-    if (this.player.inWorld === false) {
-      this.restartGame();
+    if (game.input.activePointer.isDown) {
+      this.bow.shoot();
     }
-    game.physics.arcade.overlap(this.player, this.blocks, this.restartGame, null, this);
-
-    this.labelScore.setText("" + this.score);
-  },
-
-  jump: function () {
-    this.player.body.velocity.y = -350;
-  },
-
-  addBlock: function () {
-    var x = 480,
-      y = ((Math.floor(Math.random() * 5) + 1) * 60) - 30;
-
-    var block = this.blocks.getFirstDead();
-    block.reset(x, y);
-    block.body.velocity.x = -200;
-    block.checkWorldBounds = true;
-    block.outOfBoundsKill = true;
-  },
-
-  addScore: function () {
-    this.score += 1;
-    this.labelScore.content = this.score;
   },
 
   restartGame: function () {
-
-    var previousHighscore = localStorage.getItem("highscore");
-    if (!previousHighscore || previousHighscore < this.score) {
-      localStorage.setItem("highscore", this.score);
-    }
-
-    localStorage.setItem("lastscore", this.score);
-
-    game.time.events.remove(this.blockTimer);
-    game.time.events.remove(this.scoreTimer);
     game.state.start('mainMenu');
   }
 
 };
 
-},{"../game":2}],5:[function(require,module,exports){
+},{"../classes/Bow":3,"../game":4}],7:[function(require,module,exports){
 /*globals module, require, localStorage*/
 
 var Phaser = (window.Phaser),
@@ -190,6 +202,7 @@ module.exports = {
   },
 
   addPointerEvents: function () {
+    this.startGame();
     this.input.onDown.addOnce(this.startGame, this);
   },
 
@@ -199,7 +212,7 @@ module.exports = {
 
 };
 
-},{"../game":2}],6:[function(require,module,exports){
+},{"../game":4}],8:[function(require,module,exports){
 /*globals module, require*/
 
 var Phaser = (window.Phaser);
@@ -214,7 +227,8 @@ module.exports = {
     this.load.setPreloadSprite(this.loadingBar);
 
     this.game.load.image('menu_background', 'assets/menu_background.png');
-    this.game.load.spritesheet('game_sprites', 'assets/game_sprites.png', 32, 32);
+    this.game.load.image('bow', 'assets/bow.png');
+    this.game.load.image('arrow', 'assets/arrow.png');
 
   },
 
