@@ -42,6 +42,7 @@ module.exports = {
   },
 
   addPointerEvents: function () {
+    this.startGame();
     this.input.onDown.addOnce(this.startGame, this);
   },
 

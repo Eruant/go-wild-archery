@@ -12,7 +12,8 @@ module.exports = {
     this.load.setPreloadSprite(this.loadingBar);
 
     this.game.load.image('menu_background', 'assets/menu_background.png');
-    this.game.load.spritesheet('game_sprites', 'assets/game_sprites.png', 32, 32);
+    this.game.load.image('bow', 'assets/bow.png');
+    this.game.load.image('arrow', 'assets/arrow.png');
 
   },
 
