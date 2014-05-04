@@ -1,64 +1,58 @@
 var game = require('../game'),
-  Arrow = require('../classes/Arrow');
+  Arrows = require('../classes/Arrows');
 
+/**
+ * @class Bow
+ */
 function Bow() {
 
-  this.SHOT_DELAY = 250;
-  this.ARROW_SPEED = 500;
-  this.NUMBER_OF_ARROWS = 5;
+  // constants
+  this.GRAVITY = 980;
   
-  var i, arrow;
-
+  // add the bow sprite
   this.sprite = game.add.sprite(50, game.height / 2, 'bow');
   this.sprite.anchor.setTo(1, 0.5);
 
-  this.arrowPool = game.add.group();
-  for (i = 0; i < this.NUMBER_OF_ARROWS; i++) {
-    arrow = new Arrow();
-    this.arrowPool.add(arrow.sprite);
-  }
+  // add a quiver of arrows
+  this.arrows = new Arrows(5);
 
+  // set the gravity
+  game.physics.arcade.gravity.y = this.GRAVITY;
+
+  // set the initial mouse / touch position
   game.input.activePointer.x = game.width / 2;
   game.input.activePointer.y = game.height / 2;
 
-  game.time.advancedTiming = true;
 }
 
+/*
+ * @method shoot
+ */
 Bow.prototype.shoot = function () {
 
-  if (this.lastArrowShotAt === undefined) {
-    this.lastArrowShotAt = 0;
-  }
+  // we can change this later to vary the speed of the shots
+  var speed = 700;
 
-  if (game.time.now - this.lastArrowShotAt < this.SHOT_DELAY) {
-    return;
-  }
-  this.lastArrowShotAt = game.time.now;
-
-  var arrow = this.arrowPool.getFirstDead();
-
-  if (arrow === null || arrow === undefined) {
-    return;
-  }
-
-  arrow.revive();
-
-  arrow.checkWorldBounds = true;
-  arrow.outOfBoundsKill = true;
-
-  arrow.reset(this.sprite.x, this.sprite.y);
-  arrow.rotation = this.sprite.rotation;
-
-  arrow.body.velocity.x = Math.cos(arrow.rotation) * this.ARROW_SPEED;
-  arrow.body.velocity.y = Math.sin(arrow.rotation) * this.ARROW_SPEED;
+  // release an arrow
+  this.arrows.shoot(this.sprite.x, this.sprite.y, this.sprite.rotation, speed);
 };
 
+/*
+ * @method update
+ */
 Bow.prototype.update = function () {
+
+  // angle the bow towards the pointer (mouse / finger)
+  this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
+
+  // release an arrow
   if (game.input.activePointer.isDown) {
     this.shoot();
   }
 
-  this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
+  // update the position of any alive arrows
+  this.arrows.update();
+
 };
 
 module.exports = Bow;

@@ -26,85 +26,161 @@ game.state.start('boot');
 var Phaser = (window.Phaser),
   game = require('../game');
 
-function Arrow() {
+/**
+ * @class Arrows
+ * @param {Number} arrowCount
+ */
+function Arrows(arrowCount) {
 
-  this.sprite = game.add.sprite(0, 0, 'arrow');
-  this.sprite.anchor.setTo(0.5, 0.5);
-
-  game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
-
-  this.sprite.kill();
-}
-
-module.exports = Arrow;
-
-},{"../game":4}],3:[function(require,module,exports){
-var game = require('../game'),
-  Arrow = require('../classes/Arrow');
-
-function Bow() {
-
+  // constants
   this.SHOT_DELAY = 250;
-  this.ARROW_SPEED = 500;
-  this.NUMBER_OF_ARROWS = 5;
-  
-  var i, arrow;
+  this.NUMBER_OF_ARROWS = arrowCount || 5;
 
-  this.sprite = game.add.sprite(50, game.height / 2, 'bow');
-  this.sprite.anchor.setTo(1, 0.5);
+  // variables
+  var i;
 
-  this.arrowPool = game.add.group();
+  // add new group and fill with arrows
+  this.arrows = game.add.group();
   for (i = 0; i < this.NUMBER_OF_ARROWS; i++) {
-    arrow = new Arrow();
-    this.arrowPool.add(arrow.sprite);
+    this.addArrow();
   }
 
-  game.input.activePointer.x = game.width / 2;
-  game.input.activePointer.y = game.height / 2;
-
+  // ensure that we are using advanced timeing
   game.time.advancedTiming = true;
+
 }
 
-Bow.prototype.shoot = function () {
+/**
+ * @method addArrow
+ */
+Arrows.prototype.addArrow = function () {
 
+  // add the sprite
+  var arrow = game.add.sprite(0, 0, 'arrow');
+  arrow.anchor.setTo(0.5, 0.5);
+
+  // add phyics to the sprite
+  game.physics.enable(arrow, Phaser.Physics.ARCADE);
+
+  // start it in a dead mode
+  arrow.kill();
+
+  // add it to the pool
+  this.arrows.add(arrow);
+};
+
+/**
+ * @method shoot
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} rotation
+ */
+Arrows.prototype.shoot = function (x, y, rotation, speed) {
+
+  // check to see if this is the first arrow shot
   if (this.lastArrowShotAt === undefined) {
     this.lastArrowShotAt = 0;
   }
 
+  // test to see if we are allowed to shoot
   if (game.time.now - this.lastArrowShotAt < this.SHOT_DELAY) {
     return;
   }
   this.lastArrowShotAt = game.time.now;
 
-  var arrow = this.arrowPool.getFirstDead();
+  // request a dead arrow
+  var arrow = this.arrows.getFirstDead();
 
+  // check that we have an arrow
   if (arrow === null || arrow === undefined) {
     return;
   }
 
+  // reset the arrow
   arrow.revive();
-
   arrow.checkWorldBounds = true;
   arrow.outOfBoundsKill = true;
+  arrow.reset(x, y);
 
-  arrow.reset(this.sprite.x, this.sprite.y);
-  arrow.rotation = this.sprite.rotation;
-
-  arrow.body.velocity.x = Math.cos(arrow.rotation) * this.ARROW_SPEED;
-  arrow.body.velocity.y = Math.sin(arrow.rotation) * this.ARROW_SPEED;
+  // add a direction and speed
+  arrow.body.velocity.x = Math.cos(rotation) * speed;
+  arrow.body.velocity.y = Math.sin(rotation) * speed;
 };
 
+/**
+ * @method update
+ */
+Arrows.prototype.update = function () {
+
+  // cycle all alive arrows and update there position
+  this.arrows.forEachAlive(function (arrow) {
+    arrow.rotation = Math.atan2(arrow.body.velocity.y, arrow.body.velocity.x);
+  }, this);
+};
+
+module.exports = Arrows;
+
+},{"../game":4}],3:[function(require,module,exports){
+var game = require('../game'),
+  Arrows = require('../classes/Arrows');
+
+/**
+ * @class Bow
+ */
+function Bow() {
+
+  // constants
+  this.GRAVITY = 980;
+  
+  // add the bow sprite
+  this.sprite = game.add.sprite(50, game.height / 2, 'bow');
+  this.sprite.anchor.setTo(1, 0.5);
+
+  // add a quiver of arrows
+  this.arrows = new Arrows(5);
+
+  // set the gravity
+  game.physics.arcade.gravity.y = this.GRAVITY;
+
+  // set the initial mouse / touch position
+  game.input.activePointer.x = game.width / 2;
+  game.input.activePointer.y = game.height / 2;
+
+}
+
+/*
+ * @method shoot
+ */
+Bow.prototype.shoot = function () {
+
+  // we can change this later to vary the speed of the shots
+  var speed = 700;
+
+  // release an arrow
+  this.arrows.shoot(this.sprite.x, this.sprite.y, this.sprite.rotation, speed);
+};
+
+/*
+ * @method update
+ */
 Bow.prototype.update = function () {
+
+  // angle the bow towards the pointer (mouse / finger)
+  this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
+
+  // release an arrow
   if (game.input.activePointer.isDown) {
     this.shoot();
   }
 
-  this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
+  // update the position of any alive arrows
+  this.arrows.update();
+
 };
 
 module.exports = Bow;
 
-},{"../classes/Arrow":2,"../game":4}],4:[function(require,module,exports){
+},{"../classes/Arrows":2,"../game":4}],4:[function(require,module,exports){
 var Phaser = (window.Phaser);
 
 var game = new Phaser.Game(480, 320, Phaser.AUTO, 'content', null);
