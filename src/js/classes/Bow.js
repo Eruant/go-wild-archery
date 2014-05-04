@@ -3,9 +3,9 @@ var game = require('../game'),
 
 function Bow() {
 
-  this.SHOT_DELAY = 1000;
+  this.SHOT_DELAY = 250;
   this.ARROW_SPEED = 500;
-  this.NUMBER_OF_ARROWS = 1;
+  this.NUMBER_OF_ARROWS = 5;
   
   var i, arrow;
 
@@ -17,6 +17,9 @@ function Bow() {
     arrow = new Arrow();
     this.arrowPool.add(arrow.sprite);
   }
+
+  game.input.activePointer.x = game.width / 2;
+  game.input.activePointer.y = game.height / 2;
 
   game.time.advancedTiming = true;
 }
@@ -44,9 +47,18 @@ Bow.prototype.shoot = function () {
   arrow.outOfBoundsKill = true;
 
   arrow.reset(this.sprite.x, this.sprite.y);
+  arrow.rotation = this.sprite.rotation;
 
-  arrow.body.velocity.x = this.ARROW_SPEED;
-  arrow.body.velocity.y = 0;
+  arrow.body.velocity.x = Math.cos(arrow.rotation) * this.ARROW_SPEED;
+  arrow.body.velocity.y = Math.sin(arrow.rotation) * this.ARROW_SPEED;
+};
+
+Bow.prototype.update = function () {
+  if (game.input.activePointer.isDown) {
+    this.shoot();
+  }
+
+  this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
 };
 
 module.exports = Bow;
