@@ -49,8 +49,10 @@ Bow.prototype.shoot = function () {
  */
 Bow.prototype.drawTrajectory = function () {
 
+  // constants
   var MARCH_SPEED = 40;
 
+  // variables
   var ctx = this.trajectory.context,
     correctionFactor = 0.99,
     theta = -this.sprite.rotation,
@@ -66,6 +68,7 @@ Bow.prototype.drawTrajectory = function () {
   for (t = 0 + this.timeOffset / (1000 * MARCH_SPEED / 60); t < 3; t += 0.03) {
     x = this.MAX_BULLET_SPEED * t * Math.cos(theta) * correctionFactor;
     y = this.MAX_BULLET_SPEED * t * Math.sin(theta) * correctionFactor - 0.5 * this.GRAVITY * t * t;
+    // TODO make this disappear over the distance
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.fillRect(x + this.sprite.x, this.sprite.y - y, 3, 3);
     if (y < -game.height / 2 + 50) {
