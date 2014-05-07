@@ -8,7 +8,9 @@ function Bow() {
 
   // constants
   this.GRAVITY = 980;
-  this.MAX_BULLET_SPEED = 700;
+  this.MAX_ARROW_SPEED = 700;
+
+  this.currentArrowSpeed = 0;
   
   // add the bow sprite
   this.sprite = game.add.sprite(50, game.height / 2, 'bow');
@@ -38,10 +40,13 @@ function Bow() {
 Bow.prototype.shoot = function () {
 
   // we can change this later to vary the speed of the shots
-  var speed = this.MAX_BULLET_SPEED;
+  var speed = (this.currentArrowSpeed < this.MAX_ARROW_SPEED) ? this.currentArrowSpeed : this.MAX_ARROW_SPEED;
 
   // release an arrow
   this.arrows.shoot(this.sprite.x, this.sprite.y, this.sprite.rotation, speed);
+
+  // reset power
+  this.currentArrowSpeed = 0;
 };
 
 /*
@@ -50,33 +55,38 @@ Bow.prototype.shoot = function () {
 Bow.prototype.drawTrajectory = function () {
 
   // constants
-  var MARCH_SPEED = 40;
+  var MARCH_SPEED = 40,
+    currentArrowSpeed = (this.currentArrowSpeed < this.MAX_ARROW_SPEED) ? this.currentArrowSpeed : this.MAX_ARROW_SPEED;
 
-  // variables
-  var ctx = this.trajectory.context,
-    correctionFactor = 0.99,
-    theta = -this.sprite.rotation,
-    x = 0,
-    y = 0,
-    t;
+  if (currentArrowSpeed > 0) {
 
-  ctx.clearRect(0, 0, game.width, game.height);
+    // variables
+    var ctx = this.trajectory.context,
+      correctionFactor = 0.99,
+      theta = -this.sprite.rotation,
+      x = 0,
+      y = 0,
+      t;
 
-  this.timeOffset = this.timeOffset + 1 || 0;
-  this.timeOffset = this.timeOffset % MARCH_SPEED;
+    ctx.clearRect(0, 0, game.width, game.height);
 
-  for (t = 0 + this.timeOffset / (1000 * MARCH_SPEED / 60); t < 3; t += 0.03) {
-    x = this.MAX_BULLET_SPEED * t * Math.cos(theta) * correctionFactor;
-    y = this.MAX_BULLET_SPEED * t * Math.sin(theta) * correctionFactor - 0.5 * this.GRAVITY * t * t;
-    // TODO make this disappear over the distance
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.fillRect(x + this.sprite.x, this.sprite.y - y, 3, 3);
-    if (y < -game.height / 2 + 50) {
-      break;
+    this.timeOffset = this.timeOffset + 1 || 0;
+    this.timeOffset = this.timeOffset % MARCH_SPEED;
+
+    for (t = 0 + this.timeOffset / (1000 * MARCH_SPEED / 60); t < 3; t += 0.03) {
+      x = currentArrowSpeed * t * Math.cos(theta) * correctionFactor;
+      y = currentArrowSpeed * t * Math.sin(theta) * correctionFactor - 0.5 * this.GRAVITY * t * t;
+      // TODO make this disappear over the distance
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillRect(x + this.sprite.x, this.sprite.y - y, 3, 3);
+      if (y < -game.height / 2 + 50) {
+        break;
+      }
     }
-  }
 
-  this.trajectory.dirty = true;
+    this.trajectory.dirty = true;
+
+  }
 };
 
 /*
@@ -91,6 +101,10 @@ Bow.prototype.update = function () {
 
   // release an arrow
   if (game.input.activePointer.isDown) {
+    this.currentArrowSpeed += 10;
+  }
+
+  if (game.input.activePointer.isUp && this.currentArrowSpeed > 0) {
     this.shoot();
   }
 
