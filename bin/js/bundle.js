@@ -181,35 +181,39 @@ Bow.prototype.drawTrajectory = function () {
   var MARCH_SPEED = 40,
     currentArrowSpeed = (this.currentArrowSpeed < this.MAX_ARROW_SPEED) ? this.currentArrowSpeed : this.MAX_ARROW_SPEED;
 
-  if (currentArrowSpeed > 0) {
+  // variables
+  var ctx = this.trajectory.context,
+    correctionFactor = 0.99,
+    theta = -this.sprite.rotation,
+    x = 0,
+    y = 0,
+    t;
 
-    // variables
-    var ctx = this.trajectory.context,
-      correctionFactor = 0.99,
-      theta = -this.sprite.rotation,
-      x = 0,
-      y = 0,
-      t;
+  ctx.clearRect(0, 0, game.width, game.height);
 
-    ctx.clearRect(0, 0, game.width, game.height);
+  this.timeOffset = this.timeOffset + 1 || 0;
+  this.timeOffset = this.timeOffset % MARCH_SPEED;
 
-    this.timeOffset = this.timeOffset + 1 || 0;
-    this.timeOffset = this.timeOffset % MARCH_SPEED;
-
-    for (t = 0 + this.timeOffset / (1000 * MARCH_SPEED / 60); t < 3; t += 0.03) {
-      x = currentArrowSpeed * t * Math.cos(theta) * correctionFactor;
-      y = currentArrowSpeed * t * Math.sin(theta) * correctionFactor - 0.5 * this.GRAVITY * t * t;
-      // TODO make this disappear over the distance
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fillRect(x + this.sprite.x, this.sprite.y - y, 3, 3);
-      if (y < -game.height / 2 + 50) {
-        break;
-      }
+  for (t = 0 + this.timeOffset / (1000 * MARCH_SPEED / 60); t < 3; t += 0.03) {
+    x = currentArrowSpeed * t * Math.cos(theta) * correctionFactor;
+    y = currentArrowSpeed * t * Math.sin(theta) * correctionFactor - 0.5 * this.GRAVITY * t * t;
+    // TODO make this disappear over the distance
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillRect(x + this.sprite.x, this.sprite.y - y, 3, 3);
+    if (y < -game.height / 2 + 50) {
+      break;
     }
-
-    this.trajectory.dirty = true;
-
   }
+
+  this.trajectory.dirty = true;
+
+};
+
+Bow.prototype.clearTrajectory = function () {
+
+  this.trajectory.context.clearRect(0, 0, game.width, game.height);
+  this.trajectory.dirty = true;
+
 };
 
 /*
@@ -217,7 +221,6 @@ Bow.prototype.drawTrajectory = function () {
  */
 Bow.prototype.update = function () {
 
-  this.drawTrajectory();
 
   // angle the bow towards the pointer (mouse / finger)
   this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
@@ -225,10 +228,12 @@ Bow.prototype.update = function () {
   // release an arrow
   if (game.input.activePointer.isDown) {
     this.currentArrowSpeed += 10;
+    this.drawTrajectory();
   }
 
   if (game.input.activePointer.isUp && this.currentArrowSpeed > 0) {
     this.shoot();
+    this.clearTrajectory();
   }
 
   // update the position of any alive arrows
