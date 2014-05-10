@@ -291,8 +291,6 @@ module.exports = {
 };
 
 },{"../classes/Bow":3,"../game":4}],7:[function(require,module,exports){
-/*globals module, require, localStorage*/
-
 var Phaser = (window.Phaser),
   game = require('../game');
 
@@ -301,30 +299,18 @@ module.exports = {
   create: function () {
 
     var tween,
-      highscore = localStorage.getItem("highscore"),
-      lastscore = localStorage.getItem("lastscore"),
       style = {
-        font: '30px Arial',
-        fill: '#fff'
+        font: '20px Arial',
+        fill: '#fff',
+        align: 'center'
       };
-
-    if (highscore) {
-      this.highscore = highscore;
-    } else {
-      this.highscore = 0;
-    }
 
     this.background = this.add.sprite(0, 0, 'menu_background');
     this.background.alpha = 0;
 
-    this.labelTitle = game.add.text(20, 20, "Tap to start", style);
+    this.labelTitle = game.add.text(game.width / 2, game.height / 2, "Touch to pull back string\nRelease to shoot", style);
     this.labelTitle.alpha = 0;
-
-    this.highscoreLabel = game.add.text(20, 280, "High Score: " + this.highscore, style);
-
-    if (lastscore) {
-      this.lastscoreLabel = game.add.text(20, 240, "Last Score: " + lastscore, style);
-    }
+    this.labelTitle.anchor.setTo(0.5, 0.5);
 
     tween = this.add.tween(this.background)
       .to({ alpha: 1 }, 500, Phaser.Easing.Linear.None, true);
@@ -335,7 +321,7 @@ module.exports = {
   },
 
   addPointerEvents: function () {
-    this.startGame();
+    //this.startGame();
     this.input.onDown.addOnce(this.startGame, this);
   },
 
