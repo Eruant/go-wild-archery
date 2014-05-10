@@ -8,7 +8,6 @@ var Phaser = require('phaser'),
 function Arrows(arrowCount) {
 
   // constants
-  this.SHOT_DELAY = 250;
   this.NUMBER_OF_ARROWS = arrowCount || 5;
 
   // variables
@@ -51,17 +50,6 @@ Arrows.prototype.addArrow = function () {
  * @param {Number} rotation
  */
 Arrows.prototype.shoot = function (x, y, rotation, speed) {
-
-  // check to see if this is the first arrow shot
-  if (this.lastArrowShotAt === undefined) {
-    this.lastArrowShotAt = 0;
-  }
-
-  // test to see if we are allowed to shoot
-  if (game.time.now - this.lastArrowShotAt < this.SHOT_DELAY) {
-    return;
-  }
-  this.lastArrowShotAt = game.time.now;
 
   // request a dead arrow
   var arrow = this.arrows.getFirstDead();
