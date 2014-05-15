@@ -1,5 +1,6 @@
 var Phaser = require('phaser'),
-  game = require('../game');
+  game = require('../game'),
+  language = require('../lang');
 
 module.exports = {
 
@@ -15,7 +16,7 @@ module.exports = {
     this.background = this.add.sprite(0, 0, 'menu_background');
     this.background.alpha = 0;
 
-    this.labelTitle = game.add.text(game.width / 2, game.height / 2, "Touch to pull back string\nRelease to shoot", style);
+    this.labelTitle = game.add.text(game.width / 2, game.height / 2, language[game.language].mainMenu.labelTitle, style);
     this.labelTitle.alpha = 0;
     this.labelTitle.anchor.setTo(0.5, 0.5);
 

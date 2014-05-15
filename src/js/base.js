@@ -14,6 +14,8 @@ var game = require('./game'),
     mainMenu = require('./scenes/mainMenu'),
     level1 = require('./scenes/level1');
 
+game.language = 'en';
+
 game.state.add('boot', boot, false);
 game.state.add('preloader', preloader, false);
 game.state.add('mainMenu', mainMenu, false);

@@ -15,6 +15,8 @@ var game = require('./game'),
     mainMenu = require('./scenes/mainMenu'),
     level1 = require('./scenes/level1');
 
+game.language = 'en';
+
 game.state.add('boot', boot, false);
 game.state.add('preloader', preloader, false);
 game.state.add('mainMenu', mainMenu, false);
@@ -22,7 +24,7 @@ game.state.add('level1', level1, false);
 
 game.state.start('boot');
 
-},{"./game":4,"./scenes/boot.js":5,"./scenes/level1":6,"./scenes/mainMenu":7,"./scenes/preloader":8}],2:[function(require,module,exports){
+},{"./game":4,"./scenes/boot.js":6,"./scenes/level1":7,"./scenes/mainMenu":8,"./scenes/preloader":9}],2:[function(require,module,exports){
 var Phaser = (window.Phaser),
   game = require('../game');
 
@@ -239,6 +241,15 @@ var game = new Phaser.Game(480, 320, Phaser.AUTO, 'content', null);
 module.exports = game;
 
 },{}],5:[function(require,module,exports){
+module.exports = {
+  en: {
+    mainMenu: {
+      labelTitle: "Touch to pull back string\nRelease to shoot"
+    }
+  }
+};
+
+},{}],6:[function(require,module,exports){
 /*globals module*/
 
 var game = require('../game');
@@ -269,7 +280,7 @@ module.exports = {
 
 };
 
-},{"../game":4}],6:[function(require,module,exports){
+},{"../game":4}],7:[function(require,module,exports){
 var game = require('../game'),
   Bow = require('../classes/Bow');
 
@@ -290,9 +301,10 @@ module.exports = {
 
 };
 
-},{"../classes/Bow":3,"../game":4}],7:[function(require,module,exports){
+},{"../classes/Bow":3,"../game":4}],8:[function(require,module,exports){
 var Phaser = (window.Phaser),
-  game = require('../game');
+  game = require('../game'),
+  language = require('../lang');
 
 module.exports = {
 
@@ -308,7 +320,7 @@ module.exports = {
     this.background = this.add.sprite(0, 0, 'menu_background');
     this.background.alpha = 0;
 
-    this.labelTitle = game.add.text(game.width / 2, game.height / 2, "Touch to pull back string\nRelease to shoot", style);
+    this.labelTitle = game.add.text(game.width / 2, game.height / 2, language[game.language].mainMenu.labelTitle, style);
     this.labelTitle.alpha = 0;
     this.labelTitle.anchor.setTo(0.5, 0.5);
 
@@ -331,7 +343,7 @@ module.exports = {
 
 };
 
-},{"../game":4}],8:[function(require,module,exports){
+},{"../game":4,"../lang":5}],9:[function(require,module,exports){
 /*globals module, require*/
 
 var Phaser = (window.Phaser);
