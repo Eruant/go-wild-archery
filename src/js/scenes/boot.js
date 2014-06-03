@@ -23,6 +23,9 @@ module.exports = {
       this.stage.scale.pageAlignHorizontally = true;
     }
 
+    game.language = 'en';
+    game.stage.smoothed = false;
+
     game.state.start('preloader', true, false);
   }
 
