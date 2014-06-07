@@ -31,6 +31,9 @@ gulp.task('script-compile', ['script-hints'], function () {
     .pipe(source('bundle.js'))
     /*.pipe(streamify(uglify()))*/
     .pipe(gulp.dest('bin/js'));
+
+  gulp.src('src/js/lib/*.js')
+    .pipe(gulp.dest('bin/js'));
 });
 
 gulp.task('markup', function () {
