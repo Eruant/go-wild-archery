@@ -2,17 +2,17 @@
   "name": "phaser-boilerplate",
   "version": "0.0.2",
   "devDependencies": {
-    "gulp": "^3.5.2",
-    "gulp-jshint": "^1.5.0",
+    "gulp": "^3.7.0",
+    "gulp-jshint": "^1.6.2",
     "gulp-browserify": "^0.4.6",
-    "gulp-concat": "^2.1.7",
+    "gulp-concat": "^2.2.0",
     "gulp-uglify": "^0.2.1",
-    "browser-sync": "^0.6.1",
+    "browser-sync": "^0.6.2",
     "gulp-imagemin": "^0.1.5",
     "vinyl-source-stream": "^0.1.1",
     "gulp-streamify": "0.0.4",
-    "browserify": "^3.32.1",
-    "browserify-shim": "^3.3.1"
+    "browserify": "^3.46.1",
+    "browserify-shim": "^3.5.0"
   },
   "browserify": {
     "transform": [
