@@ -280,7 +280,7 @@ module.exports = {
     }
 
     game.language = 'en';
-    game.stage.smoothed = false;
+    //game.stage.smoothed = false;
 
     game.state.start('preloader', true, false);
   }
