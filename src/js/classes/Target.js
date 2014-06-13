@@ -1,6 +1,12 @@
-var Phaser = require('phaser'),
-  game = require('game');
+function Target() {
 
-function Target() {};
+  this.invincible = true;
+}
 
-modile.exports = Target;
+Target.prototype.hit = function () {
+  if (!this.invicible) {
+    this.sprite.kill();
+  }
+};
+
+module.exports = Target;
